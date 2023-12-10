@@ -25,6 +25,7 @@
  */
 package net.runelite.client.plugins.groundmarkers;
 
+import java.awt.Color;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Runnables;
 import com.google.gson.Gson;
@@ -93,8 +94,7 @@ public class GroundMarkerPlugin extends Plugin
 	@Inject
 	private OverlayManager overlayManager;
 
-	@Inject
-	private GroundMarkerOverlay overlay;
+	// The GroundMarkerOverlay class with renderTileOverlay method to be located for edit
 
 	@Inject
 	private GroundMarkerMinimapOverlay minimapOverlay;

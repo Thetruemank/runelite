@@ -26,6 +26,7 @@
 package net.runelite.client.plugins.groundmarkers;
 
 import java.awt.Color;
+import java.awt.Color;
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -67,6 +68,16 @@ public interface GroundMarkerConfig extends Config
 	default boolean showImportExport()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+		keyName = "fillColor",
+		name = "Fill color",
+		description = "Configures the fill color for marked tiles"
+	)
+	default Color fillColor()
+	{
+		return Color.YELLOW;
 	}
 
 	@ConfigItem(
