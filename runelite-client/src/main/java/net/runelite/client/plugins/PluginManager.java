@@ -78,6 +78,7 @@ import net.runelite.client.task.Scheduler;
 import net.runelite.client.ui.SplashScreen;
 import net.runelite.client.util.GameEventManager;
 import net.runelite.client.util.ReflectUtil;
+import net.runelite.client.plugins.JythonInterpreter;
 
 @Singleton
 @Slf4j
@@ -262,18 +263,23 @@ public class PluginManager
 		}
 	}
 
-	public void loadCorePlugins() throws IOException, PluginInstantiationException
-	{
-		SplashScreen.stage(.59, null, "Loading plugins");
-		ClassPath classPath = ClassPath.from(getClass().getClassLoader());
-
-		List<Class<?>> plugins = classPath.getTopLevelClassesRecursive(PLUGIN_PACKAGE).stream()
-			.map(ClassInfo::load)
-			.collect(Collectors.toList());
-
-		loadPlugins(plugins, (loaded, total) ->
-			SplashScreen.stage(.60, .70, null, "Loading plugins", loaded, total, false));
-	}
+ public void loadCorePlugins() throws IOException, PluginInstantiationException
+ {
+ 	SplashScreen.stage(.59, null, "Loading plugins");
+ 	ClassPath classPath = ClassPath.from(getClass().getClassLoader());
+ 
+ 	List<Class<?>> plugins = classPath.getTopLevelClassesRecursive(PLUGIN_PACKAGE).stream()
+ 		.map(ClassInfo::load)
+ 		.collect(Collectors.toList());
+ 
+ 	// Load Jython plugins
+ 	JythonInterpreter jythonInterpreter = new JythonInterpreter();
+ 	List<Class<?>> jythonPlugins = jythonInterpreter.loadPlugins();
+ 	plugins.addAll(jythonPlugins);
+ 
+ 	loadPlugins(plugins, (loaded, total) ->
+ 		SplashScreen.stage(.60, .70, null, "Loading plugins", loaded, total, false));
+ }
 
 	public void loadSideLoadPlugins()
 	{
@@ -408,16 +414,24 @@ public class PluginManager
 		return newPlugins;
 	}
 
-	public boolean startPlugin(Plugin plugin) throws PluginInstantiationException
-	{
-		// plugins always start in the EDT
-		assert SwingUtilities.isEventDispatchThread();
-
-		if (activePlugins.contains(plugin) || !isPluginEnabled(plugin))
-		{
-			return false;
-		}
-
+ public boolean startPlugin(Plugin plugin) throws PluginInstantiationException
+ {
+ 	// plugins always start in the EDT
+ 	assert SwingUtilities.isEventDispatchThread();
+ 
+ 	if (activePlugins.contains(plugin) || !isPluginEnabled(plugin))
+ 	{
+ 		return false;
+ 	}
+ 
+ 	// Handle Jython plugins
+ 	if (plugin instanceof JythonPlugin)
+ 	{
+ 		JythonInterpreter jythonInterpreter = new JythonInterpreter();
+ 		jythonInterpreter.startPlugin((JythonPlugin) plugin);
+ 		return true;
+ 	}
+ 
 		List<Plugin> conflicts = conflictsForPlugin(plugin);
 		for (Plugin conflict : conflicts)
 		{
@@ -461,18 +475,26 @@ public class PluginManager
 		}
 
 		return true;
-	}
-
-	public boolean stopPlugin(Plugin plugin) throws PluginInstantiationException
-	{
-		// plugins always stop in the EDT
-		assert SwingUtilities.isEventDispatchThread();
-
-		if (!activePlugins.remove(plugin))
-		{
-			return false;
-		}
-
+ }
+ 
+ public boolean stopPlugin(Plugin plugin) throws PluginInstantiationException
+ {
+ 	// plugins always stop in the EDT
+ 	assert SwingUtilities.isEventDispatchThread();
+ 
+ 	if (!activePlugins.remove(plugin))
+ 	{
+ 		return false;
+ 	}
+ 
+ 	// Handle Jython plugins
+ 	if (plugin instanceof JythonPlugin)
+ 	{
+ 		JythonInterpreter jythonInterpreter = new JythonInterpreter();
+ 		jythonInterpreter.stopPlugin((JythonPlugin) plugin);
+ 		return true;
+ 	}
+ 
 		unschedule(plugin);
 		eventBus.unregister(plugin);
 
