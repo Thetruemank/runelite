@@ -16,6 +16,14 @@ If you have any questions, please join our IRC channel on [irc.rizon.net #runeli
 Open the project in your IDE as a Maven project, build the root module and then run the RuneLite class in runelite-client.  
 For more information visit the [RuneLite Wiki](https://github.com/runelite/runelite/wiki).
 
+## Python Plugins
+
+To create a Python plugin, follow these steps:
+
+1. Write your Python script and save it in the `python-plugins` directory.
+2. Ensure your script contains the necessary logic for the plugin.
+3. Start the RuneLite client, and your Python plugin will be loaded automatically.
+
 ### License
 
 RuneLite is licensed under the BSD 2-clause license. See the license header in the respective file to be sure.
