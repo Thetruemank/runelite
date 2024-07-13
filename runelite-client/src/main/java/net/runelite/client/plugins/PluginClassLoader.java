@@ -28,6 +28,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import org.python.util.PythonInterpreter;
 
 class PluginClassLoader extends URLClassLoader
 {
@@ -52,6 +53,14 @@ class PluginClassLoader extends URLClassLoader
 		{
 			// fall back to main class loader
 			return parent.loadClass(name);
+		}
+	}
+
+	public void loadPythonScript(String scriptPath)
+	{
+		try (PythonInterpreter pyInterp = new PythonInterpreter())
+		{
+			pyInterp.execfile(scriptPath);
 		}
 	}
 }

@@ -17,8 +17,7 @@
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
@@ -88,6 +87,7 @@ public class PluginManager
 	 */
 	private static final String PLUGIN_PACKAGE = "net.runelite.client.plugins";
 	private static final File SIDELOADED_PLUGINS = new File(RuneLite.RUNELITE_DIR, "sideloaded-plugins");
+	private static final File PYTHON_PLUGINS = new File(RuneLite.RUNELITE_DIR, "python-plugins");
 
 	private final boolean developerMode;
 	private final boolean safeMode;
@@ -309,6 +309,33 @@ public class PluginManager
 				catch (PluginInstantiationException | IOException ex)
 				{
 					log.error("error sideloading plugin", ex);
+				}
+			}
+		}
+	}
+
+	public void loadPythonPlugins()
+	{
+		File[] files = PYTHON_PLUGINS.listFiles();
+		if (files == null)
+		{
+			return;
+		}
+
+		for (File f : files)
+		{
+			if (f.getName().endsWith(".py"))
+			{
+				log.info("Loading Python plugin {}", f);
+
+				try
+				{
+					PythonPlugin plugin = new PythonPlugin(f.getAbsolutePath());
+					plugins.add(plugin);
+				}
+				catch (Exception ex)
+				{
+					log.error("Error loading Python plugin", ex);
 				}
 			}
 		}
